@@ -27,6 +27,9 @@ def main():
     log = logger.Log(configuration, NAME)
     if log.isDebugEnabled():
         log.debug("%s initialized" % NAME)
+    from ch.apis import stockprice
+    spr = stockprice.StockPriceRequests(configuration)
+    print(spr.getStockPriceData().getLastTradePrice())
     exit(0)
 
 if __name__ == "__main__":

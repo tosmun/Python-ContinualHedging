@@ -1,4 +1,6 @@
+import time
 from ch import config, logger
+from ch.apis import stockprice
 
 class Daemon(object):
 
@@ -15,6 +17,13 @@ class Daemon(object):
             self._log.debug("%s initialized" % self.__class__.__name__)
     
     def run(self):
-        #TODO
-        from ch.apis import stockprice
-        print(stockprice.StockPriceRequests(self._configuration).getQuote("T"))
+        intervalSec = self._configuration.getIntervalMin() * 60
+        sessions = self._configuration.getSessions()
+        spr = stockprice.StockPriceRequests(self._configuration)
+        while(True):
+            for session in sessions:
+                symbol = self._configuration.getSessionSymbol(session=session)
+                exchange = self._configuration.getSessionExchange(session=session)
+                ltp = spr.getQuote(symbol=symbol, exchange=exchange).getLastTradePrice()
+                self._log.info("%s[%s]: %f" % (symbol, exchange, ltp))
+            time.sleep(intervalSec)

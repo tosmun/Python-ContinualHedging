@@ -6,7 +6,7 @@ class StockPriceResponse(YQLResponse):
         super(StockPriceResponse, self).__init__(requests, responseObj)
         self._quote = super(StockPriceResponse, self).getResults()['quote']
     def getLastTradePrice(self):
-        return self._quote['LastTradePriceOnly']
+        return float(self._quote['LastTradePriceOnly'])
     
 class StockPriceRequests(YQLRequests):
     _query_format = None
@@ -16,6 +16,6 @@ class StockPriceRequests(YQLRequests):
                 responseHandler=responseHandler)
         self._query_format = configuration.getYqlApiQuoteQueryFormat()
     
-    def getQuote(self, symbol):
-        yql = self._query_format.format(symbol)
+    def getQuote(self, symbol, exchange):
+        yql = self._query_format.format(symbol, exchange)
         return super(StockPriceRequests, self).query(yql=yql)

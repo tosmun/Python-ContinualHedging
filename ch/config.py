@@ -1,10 +1,10 @@
-import os.path, configparser
+import os.path, configparser, re
 
 class Configuration(configparser.RawConfigParser):
-    _MAIN = 'Main'
     _LOGGING = 'Logging'
-    _YQL_API = 'YQL_API'
-    _YQL_API_QUOTES = 'YQL_API_Quotes'
+    _YAHOO_API = 'Yahoo API'
+    _YAHOO_API_QUOTES = 'Yahoo API Quotes'
+    _CONTINUAL_HEDGING = 'Continual Hedging'
     def __init__(self, path=None):
         super(Configuration, self).__init__(strict=False)
         if path is None:
@@ -18,18 +18,29 @@ class Configuration(configparser.RawConfigParser):
         # Read the ch_config file
         with open(path, 'r') as configFile:
             self.read_file(configFile)
+    #CONTINUAL_HEDGING
+    def getSessions(self):
+        return re.split(pattern='\s*,\s*', string=self.get(self._CONTINUAL_HEDGING, 'sessions'))
+    def getIntervalMin(self):
+        return float(self.get(self._CONTINUAL_HEDGING, 'interval_min'))
+    #SESSIONS
+    def getSessionSymbol(self, session):
+        return self.get(session, 'symbol')
+    def getSessionExchange(self, session):
+        return self.get(session, 'exchange')
     #LOGGING          
     def getLogFilePath(self):
         return os.path.expanduser(self.get(self._LOGGING, 'logFile'))
     def getLogLevel(self):
         return self.get(self._LOGGING, 'logLevel')
-    #YQL_API
+    #YAHOO_API
     def getYqlApiUrl(self):
-        return self.get(self._YQL_API, 'url')
+        return self.get(self._YAHOO_API, 'url')
     def getYqlApiEnv(self):
-        return self.get(self._YQL_API, 'env')
-    #YQL_API_QUOTES
+        return self.get(self._YAHOO_API, 'env')
+    #YAHOO_API_QUOTES
     def getYqlApiQuoteQueryFormat(self):
-        return self.get(self._YQL_API_QUOTES, 'quote_query_format')
+        return self.get(self._YAHOO_API_QUOTES, 'quote_query_format')
+    
     
     

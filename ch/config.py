@@ -3,33 +3,33 @@ import os.path, configparser
 class Configuration(configparser.RawConfigParser):
     _MAIN = 'Main'
     _LOGGING = 'Logging'
-    _STOCK_PRICE = 'StockPrice'
-    _STOCK_OPTIONS = 'StockOptions'
+    _YQL_API = 'YQL_API'
+    _YQL_API_QUOTES = 'YQL_API_Quotes'
     def __init__(self, path=None):
         super(Configuration, self).__init__(strict=False)
+        if path is None:
+            raise Exception("path is required")
         # If file path was provided, read it
-        if path is not None:
-            # Expand path
-            path = os.path.expanduser(path)
-            # Ensure exists
-            if not os.path.exists(path):
-                raise IOError('Configuration file "%s" does not exist' % path)
-            # Read the ch_config file
-            with open(path, 'r') as configFile:
-                self.read_file(configFile)
-                
+        # Expand path
+        path = os.path.expanduser(path)
+        # Ensure exists
+        if not os.path.exists(path):
+            raise IOError('Configuration file "%s" does not exist' % path)
+        # Read the ch_config file
+        with open(path, 'r') as configFile:
+            self.read_file(configFile)
+    #LOGGING          
     def getLogFilePath(self):
         return os.path.expanduser(self.get(self._LOGGING, 'logFile'))
     def getLogLevel(self):
         return self.get(self._LOGGING, 'logLevel')
-    def getStockPriceSymbol(self):
-        return self.get(self._STOCK_PRICE, 'symbol')
-    def getStockPriceApiUrl(self):
-        return self.get(self._STOCK_PRICE, 'api_url')
-    def getStockPriceApiQueryFormat(self):
-        return self.get(self._STOCK_PRICE, 'api_query_format')
-    def getStockPriceApiFormat(self):
-        return self.get(self._STOCK_PRICE, 'api_format')
-    def getStockPriceApiEnv(self):
-        return self.get(self._STOCK_PRICE, 'api_env')
+    #YQL_API
+    def getYqlApiUrl(self):
+        return self.get(self._YQL_API, 'url')
+    def getYqlApiEnv(self):
+        return self.get(self._YQL_API, 'env')
+    #YQL_API_QUOTES
+    def getYqlApiQuoteQueryFormat(self):
+        return self.get(self._YQL_API_QUOTES, 'quote_query_format')
+    
     

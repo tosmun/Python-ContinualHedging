@@ -29,7 +29,7 @@ def main():
         log.debug("%s initialized" % NAME)
     from ch.apis import stockprice
     spr = stockprice.StockPriceRequests(configuration)
-    print(spr.getStockPriceData().getLastTradePrice())
+    print(spr.get().getLastTradePrice())
     exit(0)
 
 if __name__ == "__main__":

@@ -17,22 +17,26 @@ class Response():
         return self.getStatusCode() == 200
     def errorCheck(self):
         if not self.successful():
-            raise Exception('Failed to invoke %s (%d): %s' %(self._requests._NAME, self.getStatusCode(), self.getContentAsText()))
-
+            raise Exception('ERROR in %s (%d): %s' 
+                            %(self.__class__.__name__, self.getStatusCode(), 
+                              self.getContentAsText()))
+    def __str__(self):
+        return "%s (%d): %s" %(self.__class__.__name__, 
+                               self.getStatusCode(), self.getContentAsText())
 class Requests():
-    _name = None
     _responseHandler = None
     _log = None
-    def __init__(self, configuration, name=None, responseHandler=Response):
-        self._name = name
+    def __init__(self, configuration, responseHandler=Response):
         self._responseHandler = responseHandler
         # Grab a logger
-        self._log = logger.Log(configuration, self._name)
+        self._log = logger.Log(configuration, self.__class__.__name__)
         if self._log.isDebugEnabled():
-            self._log.debug("%s initialized" % self._name)
+            self._log.debug("%s initialized" % self.__class__.__name__)
     
     def get(self, url, **kwargs):
         response = requests.get(url=url, **kwargs)
         ret = self._responseHandler(self, response)
+        if self._log.isDebugEnabled():
+            self._log.debug("get[%s %s] -> [%s]" % (url, kwargs, str(ret)))
         ret.errorCheck()
         return ret

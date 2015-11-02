@@ -28,11 +28,13 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'symbol')
     def getSessionExchange(self, session):
         return self.get(session, 'exchange')
+    def getSessionXLSFile(self, session):
+        return self.get(session, 'xls_file')
     #LOGGING          
     def getLogFilePath(self):
-        return os.path.expanduser(self.get(self._LOGGING, 'logFile'))
+        return os.path.expanduser(self.get(self._LOGGING, 'log_file'))
     def getLogLevel(self):
-        return self.get(self._LOGGING, 'logLevel')
+        return self.get(self._LOGGING, 'log_level')
     #YAHOO_API
     def getYqlApiUrl(self):
         return self.get(self._YAHOO_API, 'url')

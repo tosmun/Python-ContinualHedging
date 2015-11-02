@@ -22,6 +22,8 @@ class Daemon(object):
     def run(self):
         intervalSec = self._configuration.getIntervalMin() * 60
         sessions = self._configuration.getSessions()
+        from ch.spreadsheet import XLSReader
+        #reader = XLSReader(configuration=self._configuration, session=sessions[0])
         while(True):
             for session in sessions:
                 self._executeSessionInterval(session=session)

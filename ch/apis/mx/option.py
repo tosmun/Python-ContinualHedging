@@ -8,15 +8,17 @@ class MXOptionResponse(Response):
         'net change:': '_netChange',
         'volume:': '_volume',
         'bid price:': '_bidPrice',
-        'bid size:': '_bid size',
-        'open interest:': '_open interest',
+        'bid size:': '_bidSize',
+        'open interest:': '_openInterest',
         'ask price:': '_askPrice',
         'ask size:': '_askSize',
         'implied volatility:': '_impliedVolatility'
     }
+    _option = None
     def __init__(self, requests, responseObj):
         super(MXOptionResponse, self).__init__(requests, responseObj)
         htmlTree = html.fromstring(self.getContentAsText())
+        kwargs = { }
         for tr in htmlTree.xpath('//div[@id="quotes"]/section/section/table/tbody/tr'):
             td = tr.xpath('./td')
             #For each header in the table row
@@ -28,8 +30,34 @@ class MXOptionResponse(Response):
                     if len(td) <= i:
                         raise Exception('Failed to match value for "%s" using index %d"' % (th_text, i))
                     #Assume all values are float, trim any spacing or symbols
-                    setattr(self, self._MAPPING[th_text], float(re.sub('\s*([-+]?(?:\d*[.])?\d+).*', '\g<1>', td[i].text)))
-                    
+                    kwargs[self._MAPPING[th_text]] = float(re.sub('\s*([-+]?(?:\d*[.])?\d+).*', '\g<1>', td[i].text))
+        self._option = MXOption(**kwargs)
+        
+    def getOption(self):
+        return self._option
+    
+    def __str__(self):
+        return "%s (%d): %s" %(self.__class__.__name__, 
+                               self.getStatusCode(), self.getOption())
+
+class MXOption():
+    _ATTRIBUTES = [
+        "_lastPrice",
+        "_netChange",
+        "_volume",
+        "_bidPrice",
+        "_bidSize",
+        "_openInterest",
+        "_askPrice",
+        "_askSize",
+        "_impliedVolatility"
+    ]
+    def __init__(self, **kwargs):
+        for attrName in kwargs:
+            if attrName in self._ATTRIBUTES:
+                setattr(self, attrName, kwargs[attrName])
+        return
+    
     def getLastPrice(self):
         return self._lastPrice
     def getNetChange(self):
@@ -51,12 +79,10 @@ class MXOptionResponse(Response):
     
     def __str__(self):
         mappingStr = ""
-        for mappingItem in self._MAPPING.items():
-            attrName = mappingItem[1]
+        for attrName in self._ATTRIBUTES:
             mappingStr = "%s [%s->%f]" % (mappingStr, attrName, getattr(self, attrName))
-        return "%s (%d): %s" %(self.__class__.__name__, 
-                               self.getStatusCode(), mappingStr)
-        
+        return "%s %s" %(self.__class__.__name__, mappingStr)
+    
 class MXOptionRequests(Requests):
     _api_url = None
     def __init__(self, configuration, responseHandler=MXOptionResponse):

@@ -1,6 +1,6 @@
 import time
 from ch import config, logger
-from ch.apis import stockprice
+from ch.apis.yql import stockprice
 
 class Daemon(object):
 

@@ -4,6 +4,7 @@ class Configuration(configparser.RawConfigParser):
     _LOGGING = 'Logging'
     _YAHOO_API = 'Yahoo API'
     _YAHOO_API_QUOTES = 'Yahoo API Quotes'
+    _MX_OPTIONS = 'Montreal Exchange API Options'
     _CONTINUAL_HEDGING = 'Continual Hedging'
     def __init__(self, path=None):
         super(Configuration, self).__init__(strict=False)
@@ -28,6 +29,8 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'symbol')
     def getSessionExchange(self, session):
         return self.get(session, 'exchange')
+    def getSessionInstrument(self, session):
+        return self.get(session, 'instrument')
     def getSessionXLSFile(self, session):
         return self.get(session, 'xls_file')
     #LOGGING          
@@ -43,6 +46,9 @@ class Configuration(configparser.RawConfigParser):
     #YAHOO_API_QUOTES
     def getYqlApiQuoteQueryFormat(self):
         return self.get(self._YAHOO_API_QUOTES, 'quote_query_format')
+    #MX OPTIONS
+    def getMxApiOptionsUrl(self):
+        return self.get(self._MX_OPTIONS, 'url')
     
     
     

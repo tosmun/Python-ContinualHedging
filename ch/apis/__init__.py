@@ -7,6 +7,7 @@ class Response():
     def __init__(self, requests, responseObj):
         self._requests = requests
         self._responseObj = responseObj
+        self.errorCheck()
     def getStatusCode(self):
         return self._responseObj.status_code
     def getContentAsJson(self):
@@ -38,5 +39,4 @@ class Requests():
         ret = self._responseHandler(self, response)
         if self._log.isDebugEnabled():
             self._log.debug("get[%s %s] -> [%s]" % (url, kwargs, str(ret)))
-        ret.errorCheck()
         return ret

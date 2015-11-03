@@ -4,7 +4,7 @@ class YQLResponse(Response):
     _json = None
     def __init__(self, requests, responseObj):
         super(YQLResponse, self).__init__(requests, responseObj)
-        self._json = super(YQLResponse, self).getContentAsJson()['query']
+        self._json = self.getContentAsJson()['query']
     def getResults(self):
         return self._json['results']
 

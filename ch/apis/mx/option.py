@@ -64,7 +64,7 @@ class MXOption():
         return
     
     def getType(self):
-        return self._type
+        return self.optionType
     def getLastPrice(self):
         return self._lastPrice
     def getNetChange(self):

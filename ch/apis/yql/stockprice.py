@@ -4,8 +4,8 @@ class StockPriceResponse(YQLResponse):
     _MAPPING = {
         'LastTradePriceOnly': '_lastTradePriceOnly'
     }
-    def __init__(self, requests, responseObj):
-        super(StockPriceResponse, self).__init__(requests, responseObj)
+    def __init__(self, responseObj=None, arguments=None):
+        super(StockPriceResponse, self).__init__(responseObj=responseObj, arguments=arguments)
         quote = self.getResults()['quote']
         for key in quote:
             if key in self._MAPPING:

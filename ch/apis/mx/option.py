@@ -14,9 +14,10 @@ class MXOptionResponse(Response):
         'ask size:': '_askSize',
         'implied volatility:': '_impliedVolatility'
     }
+    _instrument = None
     _option = None
-    def __init__(self, requests, responseObj):
-        super(MXOptionResponse, self).__init__(requests, responseObj)
+    def __init__(self, responseObj=None, arguments=None):
+        super(MXOptionResponse, self).__init__(responseObj=responseObj, arguments=arguments)
         htmlTree = html.fromstring(self.getContentAsText())
         kwargs = { }
         for tr in htmlTree.xpath('//div[@id="quotes"]/section/section/table/tbody/tr'):
@@ -31,7 +32,10 @@ class MXOptionResponse(Response):
                         raise Exception('Failed to match value for "%s" using index %d"' % (th_text, i))
                     #Assume all values are float, trim any spacing or symbols
                     kwargs[self._MAPPING[th_text]] = float(re.sub('\s*([-+]?(?:\d*[.])?\d+).*', '\g<1>', td[i].text))
-        self._option = MXOption(**kwargs)
+        self._instrument = arguments['instrument']
+        #TODO Retrieve this from the HTML? We can probably stick with hardcoding from the name
+        optionType = 'CALL' if 'C' in self._instrument.upper() else 'PUT'
+        self._option = MXOption(optionType=optionType, **kwargs)
         
     def getOption(self):
         return self._option
@@ -50,14 +54,17 @@ class MXOption():
         "_openInterest",
         "_askPrice",
         "_askSize",
-        "_impliedVolatility"
+        "_impliedVolatility",
     ]
-    def __init__(self, **kwargs):
+    def __init__(self, optionType=None, **kwargs):
+        self._optionType = optionType
         for attrName in kwargs:
             if attrName in self._ATTRIBUTES:
                 setattr(self, attrName, kwargs[attrName])
         return
     
+    def getType(self):
+        return self._type
     def getLastPrice(self):
         return self._lastPrice
     def getNetChange(self):
@@ -81,7 +88,7 @@ class MXOption():
         mappingStr = ""
         for attrName in self._ATTRIBUTES:
             mappingStr = "%s [%s->%f]" % (mappingStr, attrName, getattr(self, attrName))
-        return "%s %s" %(self.__class__.__name__, mappingStr)
+        return "%s [%s] %s" %(self.__class__.__name__, self._optionType, mappingStr)
     
 class MXOptionRequests(Requests):
     _api_url = None
@@ -91,7 +98,7 @@ class MXOptionRequests(Requests):
                 responseHandler=responseHandler)
         self._api_url = configuration.getMxApiOptionsUrl()
 
-    def getOption(self, instrument):
+    def getOption(self, instrument=None):
         data = { }
         data['instrument'] = instrument
-        return super(MXOptionRequests, self).get(url=self._api_url, params=data)
+        return super(MXOptionRequests, self).get(url=self._api_url, arguments={'instrument':instrument}, params=data)

@@ -37,16 +37,16 @@ class Daemon(object):
             # Get config values for this session
             symbol = self._configuration.getSessionSymbol(session=session)
             exchange = self._configuration.getSessionExchange(session=session)
-            instrument = self._configuration.getSessionInstrument(session=session)
+            instruments = self._configuration.getSessionInstruments(session=session)
 
             # Quote
             sprResponse = self._spr.getQuote(symbol=symbol, exchange=exchange)
-            
-            # Option
-            mxopResponse = self._mxop.getOption(instrument=instrument)
-            
             self._log.info("[%s] [%s]%s: %s" % (session, exchange, symbol, str(sprResponse)))
-            self._log.info("[%s] [%s]: %s" % (session, instrument, str(mxopResponse)))
+            
+            # Options
+            for instrument in instruments:
+                mxopResponse = self._mxop.getOption(instrument=instrument)
+                self._log.info("[%s] [%s]: %s" % (session, instrument, str(mxopResponse)))
             
         except Exception as e:
             self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)

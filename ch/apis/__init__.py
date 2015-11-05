@@ -2,10 +2,8 @@ import requests
 from ch import logger
 
 class Response():
-    _requests = None
     _responseObj = None
-    def __init__(self, requests, responseObj):
-        self._requests = requests
+    def __init__(self, responseObj=None, arguments=None):
         self._responseObj = responseObj
         self.errorCheck()
     def getStatusCode(self):
@@ -34,7 +32,7 @@ class Requests():
         if self._log.isDebugEnabled():
             self._log.debug("%s initialized" % self.__class__.__name__)
     
-    def get(self, url, useCache=False, **kwargs):
+    def get(self, url, useCache=False, arguments=None, **kwargs):
         #Get provided headers (if any)
         headers = kwargs['headers'] if 'headers' in kwargs else { }
         #Ensure stripped and lowercase headers
@@ -47,7 +45,7 @@ class Requests():
         #Invoke request
         response = requests.get(url=url, **kwargs)
         #Provide response to response handler object
-        ret = self._responseHandler(self, response)
+        ret = self._responseHandler(arguments=arguments, responseObj=response)
         if self._log.isDebugEnabled():
-            self._log.debug("get[%s %s] -> [%s]" % (url, kwargs, str(ret)))
+            self._log.debug("get[%s %s %s] -> [%s]" % (url, arguments, kwargs, str(ret)))
         return ret

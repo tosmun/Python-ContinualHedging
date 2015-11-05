@@ -29,8 +29,8 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'symbol')
     def getSessionExchange(self, session):
         return self.get(session, 'exchange')
-    def getSessionInstrument(self, session):
-        return self.get(session, 'instrument')
+    def getSessionInstruments(self, session):
+        return re.split(pattern='\s*,\s*', string=self.get(session, 'instruments'))
     def getSessionXLSFile(self, session):
         return self.get(session, 'xls_file')
     #LOGGING          

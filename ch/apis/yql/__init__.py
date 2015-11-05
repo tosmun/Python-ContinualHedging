@@ -2,8 +2,8 @@ from ch.apis import Requests, Response
 
 class YQLResponse(Response):
     _json = None
-    def __init__(self, requests, responseObj):
-        super(YQLResponse, self).__init__(requests, responseObj)
+    def __init__(self, responseObj=None, arguments=None):
+        super(YQLResponse, self).__init__(responseObj=responseObj, arguments=arguments)
         self._json = self.getContentAsJson()['query']
     def getResults(self):
         return self._json['results']

@@ -4,11 +4,13 @@ from ch.apis.yql import stockprice
 from ch.apis.mx import option
 from ch.spreadsheet import TradingBook
 class Daemon(object):
-
     _log = None
+    _intervalSec = None
+    _sessions = [ ]
     _configuration = None
     _spr = None
     _mxop = None
+    _tradebooks = { }
     def __init__(self, configFilePath):
         if configFilePath is None:
             raise Exception("configFilePath is required")
@@ -19,22 +21,20 @@ class Daemon(object):
         # Intialize api(s)
         self._spr = stockprice.YQLStockPriceRequests(self._configuration)
         self._mxop = option.MXOptionRequests(self._configuration)
+        #Config
+        self._intervalSec = self._configuration.getIntervalMin() * 60
+        self._sessions = self._configuration.getSessions()
+        #Initialize session vars
+        for session in self._sessions:
+            self._tradebooks[session] = TradingBook(self._configuration, session=session)
         if self._log.isDebugEnabled():
             self._log.debug("%s initialized" % self.__class__.__name__)
     
     def run(self):
-        #Config
-        intervalSec = self._configuration.getIntervalMin() * 60
-        sessions = self._configuration.getSessions()
-        #Tradebooks
-        tradebooks = {}
-        #Initialize
-        for session in sessions:
-            tradebooks[session] = TradingBook(self._configuration, session=session)
         while(True):
-            for session in sessions:
+            for session in self._sessions:
                 self._executeSessionInterval(session=session)
-            time.sleep(intervalSec)
+            time.sleep(self._intervalSec)
             
     def _executeSessionInterval(self, session):
         try:

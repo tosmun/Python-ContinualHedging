@@ -2,7 +2,7 @@ import time
 from ch import config, logger
 from ch.apis.yql import stockprice
 from ch.apis.mx import option
-
+from ch.spreadsheet import TradingBook
 class Daemon(object):
 
     _log = None
@@ -17,16 +17,20 @@ class Daemon(object):
         # Grab a logger
         self._log = logger.Log(self._configuration, self.__class__.__name__)
         # Intialize api(s)
-        self._spr = stockprice.StockPriceRequests(self._configuration)
+        self._spr = stockprice.YQLStockPriceRequests(self._configuration)
         self._mxop = option.MXOptionRequests(self._configuration)
         if self._log.isDebugEnabled():
             self._log.debug("%s initialized" % self.__class__.__name__)
     
     def run(self):
+        #Config
         intervalSec = self._configuration.getIntervalMin() * 60
         sessions = self._configuration.getSessions()
-        #from ch.spreadsheet import XLSReader
-        #reader = XLSReader(configuration=self._configuration, session=sessions[0])
+        #Tradebooks
+        tradebooks = {}
+        #Initialize
+        for session in sessions:
+            tradebooks[session] = TradingBook(self._configuration, session=session)
         while(True):
             for session in sessions:
                 self._executeSessionInterval(session=session)

@@ -21,7 +21,7 @@ class Configuration(configparser.RawConfigParser):
             self.read_file(configFile)
     #CONTINUAL_HEDGING
     def getSessions(self):
-        return re.split(pattern='\s*,\s*', string=self.get(self._CONTINUAL_HEDGING, 'sessions'))
+        return [x for x in re.split(pattern='\s*,\s*', string=self.get(self._CONTINUAL_HEDGING, 'sessions')) if x.strip() != ""]
     def getIntervalMin(self):
         return float(self.get(self._CONTINUAL_HEDGING, 'interval_min'))
     #SESSIONS
@@ -30,7 +30,7 @@ class Configuration(configparser.RawConfigParser):
     def getSessionExchange(self, session):
         return self.get(session, 'exchange')
     def getSessionInstruments(self, session):
-        return re.split(pattern='\s*,\s*', string=self.get(session, 'instruments'))
+        return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'instruments')) if x.strip() != ""]
     def getSessionXLSFile(self, session):
         return self.get(session, 'xls_file')
     #LOGGING          

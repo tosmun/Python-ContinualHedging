@@ -33,6 +33,10 @@ class Configuration(configparser.RawConfigParser):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'instruments')) if x.strip() != ""]
     def getSessionXLSFile(self, session):
         return self.get(session, 'xls_file')
+    def getSessionXLSSourceSheet(self, session):
+        return self.get(session, 'xls_source_sheet')
+    def getSessionXLSUnitPriceCell(self, session):
+        return self.get(session, 'xls_unit_price_cell')
     #LOGGING          
     def getLogFilePath(self):
         return os.path.expanduser(self.get(self._LOGGING, 'log_file'))

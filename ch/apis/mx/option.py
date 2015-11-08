@@ -37,6 +37,9 @@ class MXOptionResponse(Response):
         optionType = 'CALL' if 'C' in self._instrument.upper() else 'PUT'
         self._option = MXOption(optionType=optionType, **kwargs)
         
+    def getInstrument(self):
+        return self._instrument
+    
     def getOption(self):
         return self._option
     

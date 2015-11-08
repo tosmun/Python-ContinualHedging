@@ -1,7 +1,24 @@
 import openpyxl
+import calendar, time
+#from xlutils.copy import copy
 class TradingBook():
     _wb = None
-    def __init__(self, configuration=None, session=None):
-        self._wb = openpyxl.load_workbook(filename=configuration.getSessionXLSFile(session=session))
-        #print(self._wb['#2 Oct 27']['C33'].value)
+    _sourceSheet = None
+    _newSheet = None
+    _configuration = None
+    def __init__(self, configuration, session):
+        self._configuration = configuration
+        self._wb = openpyxl.load_workbook(filename=self._configuration.getSessionXLSFile(session=session))
+        sourceSheetName = self._configuration.getSessionXLSSourceSheet(session=session)
+        if sourceSheetName not in self._wb:
+            raise Exception("Source sheet '%s' does not exist" % sourceSheetName)
+        self._sourceSheet = self._wb[sourceSheetName]
+        #COPY HERE
+        self._newSheet.setName(self._wb.copycalendar.timegm(time.gmtime()))
     
+    def applyUnitPrice(self, stockprice):
+        #TODO
+        return 
+    def applyOption(self, option):
+        instrument = option.getInstrument()
+        

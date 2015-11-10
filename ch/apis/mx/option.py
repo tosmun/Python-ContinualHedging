@@ -31,6 +31,9 @@ class MXOptionResponse(Response):
                     if len(td) <= i:
                         raise Exception('Failed to match value for "%s" using index %d"' % (th_text, i))
                     #Assume all values are float, trim any spacing or symbols
+                    #TODO fix me
+                    if td[i].text == '--':
+                        td[i].text = '-1'
                     kwargs[self._MAPPING[th_text]] = float(re.sub('\s*([-+]?(?:\d*[.])?\d+).*', '\g<1>', td[i].text))
         self._instrument = arguments['instrument']
         #TODO Retrieve this from the HTML? We can probably stick with hardcoding from the name

@@ -31,10 +31,10 @@ class Daemon(object):
             self._log.debug("%s initialized" % self.__class__.__name__)
     
     def run(self):
-        while(True):
+        #while(True):
             for session in self._sessions:
                 self._executeSessionInterval(session=session)
-            time.sleep(self._intervalSec)
+            #time.sleep(self._intervalSec)
             
     def _executeSessionInterval(self, session):
         try:
@@ -52,5 +52,12 @@ class Daemon(object):
                 mxopResponse = self._mxop.getOption(instrument=instrument)
                 self._log.info("[%s] [%s]: %s" % (session, instrument, str(mxopResponse)))
             
+            # New sheet
+            sheet = self._tradebooks[session].newSheet()
+            sheet.applyStockPrice(stockprice=sprResponse)
+            sheet.commit()
+            # TODO
+            self._tradebooks[session].save()
         except Exception as e:
-            self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)
+            raise e
+            #self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)

@@ -1,4 +1,4 @@
-import os.path, configparser, re
+import calendar, time, os.path, configparser, re
 
 class Configuration(configparser.RawConfigParser):
     _LOGGING = 'Logging'
@@ -24,7 +24,7 @@ class Configuration(configparser.RawConfigParser):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(self._CONTINUAL_HEDGING, 'sessions')) if x.strip() != ""]
     def getIntervalMin(self):
         return float(self.get(self._CONTINUAL_HEDGING, 'interval_min'))
-    def getOutputDirectory(self):
+    def getOutputDir(self):
         return self.get(self._CONTINUAL_HEDGING, 'output_dir')
     #SESSIONS
     def getSessionSymbol(self, session):
@@ -35,10 +35,14 @@ class Configuration(configparser.RawConfigParser):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'instruments')) if x.strip() != ""]
     def getSessionXLSFile(self, session):
         return self.get(session, 'xls_file')
-    def getSessionXLSSourceSheet(self, session):
-        return self.get(session, 'xls_source_sheet')
+    def getSessionXLSSheetName(self, session):
+        return self.get(session, 'xls_sheet_name')
     def getSessionXLSUnitPriceCell(self, session):
         return self.get(session, 'xls_unit_price_cell')
+    def getSessionDir(self, session):
+        return os.path.join(self.getOutputDir(), session)
+    def getNewSessionIntervalDir(self, session):
+        return os.path.join(self.getSessionDir(session=session), str(calendar.timegm(time.gmtime())))
     #LOGGING          
     def getLogFilePath(self):
         return os.path.expanduser(self.get(self._LOGGING, 'log_file'))

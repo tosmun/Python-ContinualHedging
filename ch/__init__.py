@@ -1,8 +1,8 @@
-import time, os, shutil
+import calendar, time, os
 from ch import config, logger
 from ch.apis.yql import stockprice
 from ch.apis.mx import option
-from ch.spreadsheet import TradingBook
+from ch.spreadsheet import TradingSessions
 class Daemon(object):
     _log = None
     _intervalSec = None
@@ -10,7 +10,7 @@ class Daemon(object):
     _configuration = None
     _spr = None
     _mxop = None
-    _tradebooks = { }
+    _tradingsessions = { }
     def __init__(self, configFilePath):
         if configFilePath is None:
             raise Exception("configFilePath is required")
@@ -25,22 +25,22 @@ class Daemon(object):
         self._intervalSec = self._configuration.getIntervalMin() * 60
         self._sessions = self._configuration.getSessions()
         #Initialize output dir
-        outputDir = self._configuration.getOutputDirectory()
+        outputDir = self._configuration.getOutputDir()
         if os.path.isfile(outputDir):
             raise Exception('Output directory "%s" is a file' % outputDir)
         elif not os.path.exists(outputDir):
             os.mkdir(outputDir, mode=755)
         #Initialize session vars
         for session in self._sessions:
-            self._tradebooks[session] = TradingBook(self._configuration, session=session)
+            self._tradingsessions[session] = TradingSessions(self._configuration, session=session)
         if self._log.isDebugEnabled():
             self._log.debug("%s initialized" % self.__class__.__name__)
     
     def run(self):
-        #while(True):
+        while(True):
             for session in self._sessions:
                 self._executeSessionInterval(session=session)
-            #time.sleep(self._intervalSec)
+            time.sleep(self._intervalSec)
             
     def _executeSessionInterval(self, session):
         try:
@@ -58,12 +58,16 @@ class Daemon(object):
                 mxopResponse = self._mxop.getOption(instrument=instrument)
                 self._log.info("[%s] [%s]: %s" % (session, instrument, str(mxopResponse)))
             
-            # New sheet
-            sheet = self._tradebooks[session].newSheet()
-            sheet.applyStockPrice(stockprice=sprResponse)
-            sheet.commit()
-            # TODO
-            self._tradebooks[session].save()
+            # New session interval dir (does not create it yet)
+            intervalDir = self._configuration.getNewSessionIntervalDir(session=session)
+            
+            # Now that we have the data we need, create a new trading session
+            tradingSession = self._tradingsessions[session].newTradingSession()
+            
+            tradingSession.applyStockPrice(stockprice=sprResponse)
+            
+            self._tradingsessions[session].commitTradingSession(tradingSession=tradingSession, outputDir=intervalDir)
+           
         except Exception as e:
             raise e
             #self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)

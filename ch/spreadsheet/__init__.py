@@ -53,10 +53,10 @@ class TradingSessions():
         self._refwbpath= newPath
 
 class TradingSession():
+    _config = None
+    _session = None
     _wb = None
     _sheet = None
-    _config = None
-    _sessionIntervalDir = None
     def __init__(self, wb, config, session):
         self._config = config
         self._session = session
@@ -71,5 +71,19 @@ class TradingSession():
         return 
     def applyOption(self, option):
         instrument = option.getInstrument()
+        optionObj = option.getOption()
+        #Strike price
+        strikeCell = self._config.getSessionInstrumentXLSStrikeCell(session=self._session, instrument=instrument)
+        if strikeCell is not None and strikeCell.strip() != '':
+            self._sheet[strikeCell].value = optionObj.getLastPrice()
+        volCell = self._config.getSessionInstrumentXLSVolatilityCell(session=self._session, instrument=instrument)
+        if volCell is not None and volCell.strip() != '':
+            self._sheet[volCell].value = optionObj.getImpliedVolatility() / 100
+        bidOptionPriceCell = self._config.getSessionInstrumentXLSBidOptionPriceCell(session=self._session, instrument=instrument)
+        if bidOptionPriceCell is not None and bidOptionPriceCell.strip() != '':
+            self._sheet[bidOptionPriceCell].value = optionObj.getBidPrice()
+        askOptionPriceCell = self._config.getSessionInstrumentXLSAskOptionPriceCell(session=self._session, instrument=instrument)
+        if askOptionPriceCell is not None and askOptionPriceCell.strip() != '':
+            self._sheet[askOptionPriceCell].value = optionObj.getAskPrice()
     def _save(self, filepath):
         self._wb.save(filename=filepath)

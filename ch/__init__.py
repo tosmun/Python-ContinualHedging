@@ -53,11 +53,12 @@ class Daemon(object):
             sprResponse = self._spr.getQuote(symbol=symbol, exchange=exchange)
             self._log.info("[%s] [%s]%s: %s" % (session, exchange, symbol, str(sprResponse)))
             
+            mxopResponses = { }
             # Options
             for instrument in instruments:
                 mxopResponse = self._mxop.getOption(instrument=instrument)
                 self._log.info("[%s] [%s]: %s" % (session, instrument, str(mxopResponse)))
-            
+                mxopResponses[instrument] = mxopResponse
             # New session interval dir (does not create it yet)
             intervalDir = self._configuration.getNewSessionIntervalDir(session=session)
             
@@ -65,7 +66,9 @@ class Daemon(object):
             tradingSession = self._tradingsessions[session].newTradingSession()
             
             tradingSession.applyStockPrice(stockprice=sprResponse)
-            
+            for instrument in mxopResponses:
+                tradingSession.applyOption(option=mxopResponses[instrument])
+                
             self._tradingsessions[session].commitTradingSession(tradingSession=tradingSession, outputDir=intervalDir)
            
         except Exception as e:

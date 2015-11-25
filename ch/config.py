@@ -37,6 +37,14 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'xls_file')
     def getSessionXLSSheetName(self, session):
         return self.get(session, 'xls_sheet_name')
+    def getSessionInstrumentXLSStrikeCell(self, session, instrument):
+        return self.get("%s %s" % (session, instrument), 'xls_strike_cell')
+    def getSessionInstrumentXLSVolatilityCell(self, session, instrument):
+        return self.get("%s %s" % (session, instrument), 'xls_volatility_cell')
+    def getSessionInstrumentXLSBidOptionPriceCell(self, session, instrument):
+        return self.get("%s %s" % (session, instrument), 'xls_bid_option_price_cell')
+    def getSessionInstrumentXLSAskOptionPriceCell(self, session, instrument):
+        return self.get("%s %s" % (session, instrument), 'xls_ask_option_price_cell')
     def getSessionXLSUnitPriceCell(self, session):
         return self.get(session, 'xls_unit_price_cell')
     def getSessionDir(self, session):

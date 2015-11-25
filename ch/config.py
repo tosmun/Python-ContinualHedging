@@ -24,6 +24,8 @@ class Configuration(configparser.RawConfigParser):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(self._CONTINUAL_HEDGING, 'sessions')) if x.strip() != ""]
     def getIntervalMin(self):
         return float(self.get(self._CONTINUAL_HEDGING, 'interval_min'))
+    def getOutputDirectory(self):
+        return self.get(self._CONTINUAL_HEDGING, 'output_dir')
     #SESSIONS
     def getSessionSymbol(self, session):
         return self.get(session, 'symbol')

@@ -1,4 +1,4 @@
-import time
+import time, os, shutil
 from ch import config, logger
 from ch.apis.yql import stockprice
 from ch.apis.mx import option
@@ -24,6 +24,12 @@ class Daemon(object):
         #Config
         self._intervalSec = self._configuration.getIntervalMin() * 60
         self._sessions = self._configuration.getSessions()
+        #Initialize output dir
+        outputDir = self._configuration.getOutputDirectory()
+        if os.path.isfile(outputDir):
+            raise Exception('Output directory "%s" is a file' % outputDir)
+        elif not os.path.exists(outputDir):
+            os.mkdir(outputDir, mode=755)
         #Initialize session vars
         for session in self._sessions:
             self._tradebooks[session] = TradingBook(self._configuration, session=session)

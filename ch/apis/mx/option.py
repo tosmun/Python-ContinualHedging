@@ -38,6 +38,7 @@ class MXOptionResponse(Response):
         self._instrument = arguments['instrument']
         #TODO Retrieve this from the HTML? We can probably stick with hardcoding from the name
         optionType = 'CALL' if 'C' in self._instrument.upper() else 'PUT'
+        kwargs['_strikePrice'] = float(re.sub('\w+\s+[0-9]+(?:C|P)([-+]?(?:\d*[.])?\d+)', '\g<1>', self._instrument))
         self._option = MXOption(optionType=optionType, **kwargs)
         
     def getInstrument(self):
@@ -61,6 +62,7 @@ class MXOption():
         "_askPrice",
         "_askSize",
         "_impliedVolatility",
+        "_strikePrice",
     ]
     def __init__(self, optionType=None, **kwargs):
         self._optionType = optionType
@@ -71,6 +73,8 @@ class MXOption():
     
     def getType(self):
         return self.optionType
+    def getStrikePrice(self):
+        return self._strikePrice
     def getLastPrice(self):
         return self._lastPrice
     def getNetChange(self):

@@ -83,7 +83,7 @@ class TradingSession():
         #Strike price
         strikeCell = self._config.getSessionInstrumentXLSStrikeCell(session=self._session, instrument=instrument)
         if strikeCell is not None and strikeCell.strip() != '':
-            self._sheet[strikeCell].value = optionObj.getLastPrice()
+            self._sheet[strikeCell].value = optionObj.getStrikePrice()
         volCell = self._config.getSessionInstrumentXLSVolatilityCell(session=self._session, instrument=instrument)
         if volCell is not None and volCell.strip() != '':
             self._sheet[volCell].value = optionObj.getImpliedVolatility() / 100

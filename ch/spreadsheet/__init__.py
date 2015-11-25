@@ -80,6 +80,10 @@ class TradingSession():
     def applyOption(self, option):
         instrument = option.getInstrument()
         optionObj = option.getOption()
+        #ID
+        idCell = self._config.getSessionInstrumentXLSIDCell(session=self._session, instrument=instrument)
+        if idCell is not None and idCell.strip() != '':
+            self._sheet[idCell] = instrument
         #Strike price
         strikeCell = self._config.getSessionInstrumentXLSStrikeCell(session=self._session, instrument=instrument)
         if strikeCell is not None and strikeCell.strip() != '':

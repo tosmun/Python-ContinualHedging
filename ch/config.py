@@ -41,6 +41,8 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'xls_previous_date_cell')
     def getSessionXLSSheetName(self, session):
         return self.get(session, 'xls_sheet_name')
+    def getSessionInstrumentXLSIDCell(self, session, instrument):
+        return self.get("%s %s" % (session, instrument), 'xls_id_cell')
     def getSessionInstrumentXLSStrikeCell(self, session, instrument):
         return self.get("%s %s" % (session, instrument), 'xls_strike_cell')
     def getSessionInstrumentXLSVolatilityCell(self, session, instrument):

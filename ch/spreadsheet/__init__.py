@@ -65,6 +65,14 @@ class TradingSession():
         if not sheetName in self._wb.get_sheet_names():
             raise Exception('Source sheet "%s" does not exist in workbook "%s"' % (sheetName, self._wbpath))
         self._sheet = self._wb.get_sheet_by_name(sheetName)
+        self._assignDates()
+    def _assignDates(self):
+        prevDateCell = self._config.getSessionXLSPreviousDateCell(session=self._session)
+        dateCell = self._config.getSessionXLSDateCell(session=self._session)
+        newDate = datetime.datetime.now()
+        prevDate = self._sheet[dateCell].value
+        self._sheet[dateCell].value = newDate
+        self._sheet[prevDateCell].value = prevDate
     def applyStockPrice(self, stockprice):
         cell = self._config.getSessionXLSUnitPriceCell(session=self._session)
         self._sheet[cell] = stockprice.getLastTradePrice()

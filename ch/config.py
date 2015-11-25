@@ -35,6 +35,10 @@ class Configuration(configparser.RawConfigParser):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'instruments')) if x.strip() != ""]
     def getSessionXLSFile(self, session):
         return self.get(session, 'xls_file')
+    def getSessionXLSDateCell(self, session):
+        return self.get(session, 'xls_date_cell')
+    def getSessionXLSPreviousDateCell(self, session):
+        return self.get(session, 'xls_previous_date_cell')
     def getSessionXLSSheetName(self, session):
         return self.get(session, 'xls_sheet_name')
     def getSessionInstrumentXLSStrikeCell(self, session, instrument):

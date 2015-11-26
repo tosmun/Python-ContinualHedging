@@ -63,5 +63,4 @@ class Daemon(object):
             self._deltaHedges[session].doHedge(spr=spr, oprs=oprs)
             
         except Exception as e:
-            raise e
-            #self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)
+            self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)

@@ -45,7 +45,7 @@ class DeltaHedge():
         shutil.copy(self._filePath, self._bckFilePath)
     def _rollback(self):
         if os.path.isfile(self._bckFilePath):
-            shutil.copy(self._bckFilePath, self._filePath)
+            shutil.move(self._bckFilePath, self._filePath)
     def _commit(self):
         if os.path.isfile(self._bckFilePath):
             os.remove(self._bckFilePath)

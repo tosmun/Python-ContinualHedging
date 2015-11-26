@@ -15,7 +15,7 @@ class DeltaHedge():
     _timeH = None
     _stockPriceH = None
     _implVolH = None
-    _elapsedTimeH = None
+    _timeR = None
     _deltaH = None
     _sharesH = None
     #Format
@@ -33,7 +33,7 @@ class DeltaHedge():
         self._timeH = self._config.getSessionDHHTime(session=session)
         self._stockPriceH = self._config.getSessionDHHStockPrice(session=self._session)
         self._implVolH = self._config.getSessionDHHImplVol(session=self._session)
-        self._elapsedTimeH = self._config.getSessionDHHElapsedTime(session=self._session)
+        self._timeR = self._config.getSessionDHHTimeR(session=self._session)
         self._deltaH = self._config.getSessionDHHDelta(session=self._session)
         self._sharesH = self._config.getSessionDHHShares(session=self._session)
         self._timeFormat = self._config.getSessionDHTimeFormat(session=session)
@@ -72,7 +72,7 @@ class _DeltaHedgeData():
     _stockPrice = None
     _impliedVol = None
     _timeStampSec = None
-    _elapsedTimeYears = None
+    _timeRYears = None
     _delta = -1
     _shares = -1
     def __init__(self, parent, spr, oprs):
@@ -91,17 +91,16 @@ class _DeltaHedgeData():
         option = opr.getOption()
         self._impliedVol = option.getImpliedVolatility()
         #TODO
-        self._elapsedTimeYears = (int(self._parent._config.getHardcodedExpTime(session=self._parent._session)) - self._timeStampSec) / (60 * 60 * 24 * 365)
+        self._timeRYears = (int(self._parent._config.getHardcodedExpTime(session=self._parent._session)) - self._timeStampSec) / (60 * 60 * 24 * 365)
         
         #d2
         #TODO 42.49
         d2 = (
               math.log(self._stockPrice / 42.49) + 
-                (((self._parent._interestRate - (self._impliedVol * self._impliedVol)) / 2) * self._elapsedTimeYears)
-            ) / (self._impliedVol * math.sqrt(self._elapsedTimeYears))
-        print(d2)
+                (((self._parent._interestRate - (self._impliedVol * self._impliedVol)) / 2) * self._timeRYears)
+            ) / (self._impliedVol * math.sqrt(self._timeRYears))
         #delta
-        self._delta = -1 * math.exp(-1 * self._parent._interestRate * self._elapsedTimeYears) * (math.exp(-1 * d2*d2 / 2) / math.sqrt(2 * math.pi)) / (self._impliedVol * self._stockPrice * math.sqrt(self._elapsedTimeYears))
+        self._delta = -1 * math.exp(-1 * self._parent._interestRate * self._timeRYears) * (math.exp(-1 * d2*d2 / 2) / math.sqrt(2 * math.pi)) / (self._impliedVol * self._stockPrice * math.sqrt(self._timeRYears))
         self._delta *= -232000
         #TODO -232000
         self._shares = -1 * round(self._delta)
@@ -112,7 +111,7 @@ class _DeltaHedgeData():
         ret[self._parent._timeH] = time.strftime(self._parent._timeFormat, time.localtime(self._timeStampSec))
         ret[self._parent._stockPriceH] = "%.2f" % self._stockPrice
         ret[self._parent._implVolH] = "%.2f" % self._impliedVol
-        ret[self._parent._elapsedTimeH] = "%.5f" % self._elapsedTimeYears
+        ret[self._parent._timeR] = "%.5f" % self._timeRYears
         ret[self._parent._deltaH] = "%.5f" % self._delta
         ret[self._parent._sharesH] = "%d" % self._shares
         return ret;

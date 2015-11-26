@@ -50,8 +50,8 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'df_h_stock_price')
     def getSessionDHHImplVol(self, session):
         return self.get(session, 'df_h_impl_vol')
-    def getSessionDHHElapsedTime(self, session):
-        return self.get(session, 'df_h_elapsed_time')
+    def getSessionDHHTimeR(self, session):
+        return self.get(session, 'df_h_time_r')
     def getSessionDHHDelta(self, session):
         return self.get(session, 'df_h_delta')
     def getSessionDHHShares(self, session):

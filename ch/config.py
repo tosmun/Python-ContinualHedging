@@ -1,4 +1,4 @@
-import calendar, time, os.path, configparser, re
+import os.path, configparser, re, time
 
 class Configuration(configparser.RawConfigParser):
     _LOGGING = 'Logging'
@@ -32,31 +32,32 @@ class Configuration(configparser.RawConfigParser):
     def getSessionExchange(self, session):
         return self.get(session, 'exchange')
     def getSessionInstruments(self, session):
-        return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'instruments')) if x.strip() != ""]
-    def getSessionXLSFile(self, session):
-        return self.get(session, 'xls_file')
-    def getSessionXLSDateCell(self, session):
-        return self.get(session, 'xls_date_cell')
-    def getSessionXLSPreviousDateCell(self, session):
-        return self.get(session, 'xls_previous_date_cell')
-    def getSessionXLSSheetName(self, session):
-        return self.get(session, 'xls_sheet_name')
-    def getSessionInstrumentXLSIDCell(self, session, instrument):
-        return self.get("%s %s" % (session, instrument), 'xls_id_cell')
-    def getSessionInstrumentXLSStrikeCell(self, session, instrument):
-        return self.get("%s %s" % (session, instrument), 'xls_strike_cell')
-    def getSessionInstrumentXLSVolatilityCell(self, session, instrument):
-        return self.get("%s %s" % (session, instrument), 'xls_volatility_cell')
-    def getSessionInstrumentXLSBidOptionPriceCell(self, session, instrument):
-        return self.get("%s %s" % (session, instrument), 'xls_bid_option_price_cell')
-    def getSessionInstrumentXLSAskOptionPriceCell(self, session, instrument):
-        return self.get("%s %s" % (session, instrument), 'xls_ask_option_price_cell')
-    def getSessionXLSUnitPriceCell(self, session):
-        return self.get(session, 'xls_unit_price_cell')
+        return self.getSessionDHInstruments(session=session)
     def getSessionDir(self, session):
         return os.path.join(self.getOutputDir(), session)
-    def getNewSessionIntervalDir(self, session):
-        return os.path.join(self.getSessionDir(session=session), str(calendar.timegm(time.gmtime())))
+    #DELTA HEDGE
+    def getSessionDHInstruments(self, session):
+        return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'dh_instruments')) if x.strip() != ""]
+    def getSessionDHFileFormat(self, session):
+        return self.get(session, 'dh_file_format')
+    def getSessionDHFileHeaders(self, session):
+        return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'df_file_headers')) if x.strip() != ""]
+    def getSessionDHHTime(self, session):
+        return self.get(session, 'df_h_time')
+    def getSessionDHHStockPrice(self, session):
+        return self.get(session, 'df_h_stock_price')
+    def getSessionDHHImplVol(self, session):
+        return self.get(session, 'df_h_impl_vol')
+    def getSessionDHHElapsedTime(self, session):
+        return self.get(session, 'df_h_elapsed_time')
+    def getSessionDHHDelta(self, session):
+        return self.get(session, 'df_h_delta')
+    def getSessionDHHShares(self, session):
+        return self.get(session, 'df_h_shares')
+    def getSessionDHTimeFormat(self, session):
+        return self.get(session, 'df_h_time_format')
+    def getHardcodedExpTime(self, session):
+        return self.get(session, 'expiration_date_sec')
     #LOGGING          
     def getLogFilePath(self):
         return os.path.expanduser(self.get(self._LOGGING, 'log_file'))

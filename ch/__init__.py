@@ -2,7 +2,7 @@ import calendar, time, os
 from ch import config, logger
 from ch.apis.yql import stockprice
 from ch.apis.mx import option
-from ch.spreadsheet import TradingSessions
+from ch.csv.delta import DeltaHedge
 class Daemon(object):
     _log = None
     _intervalSec = None
@@ -10,7 +10,7 @@ class Daemon(object):
     _configuration = None
     _spr = None
     _mxop = None
-    _tradingsessions = { }
+    _deltaHedges = { }
     def __init__(self, configFilePath):
         if configFilePath is None:
             raise Exception("configFilePath is required")
@@ -30,9 +30,9 @@ class Daemon(object):
             raise Exception('Output directory "%s" is a file' % outputDir)
         elif not os.path.exists(outputDir):
             os.mkdir(outputDir, mode=755)
-        #Initialize session vars
+        #Initialize hedges
         for session in self._sessions:
-            self._tradingsessions[session] = TradingSessions(self._configuration, session=session)
+            self._deltaHedges[session] = DeltaHedge(config=self._configuration, session=session)
         if self._log.isDebugEnabled():
             self._log.debug("%s initialized" % self.__class__.__name__)
     
@@ -50,27 +50,18 @@ class Daemon(object):
             instruments = self._configuration.getSessionInstruments(session=session)
 
             # Quote
-            sprResponse = self._spr.getQuote(symbol=symbol, exchange=exchange)
-            self._log.info("[%s] [%s]%s: %s" % (session, exchange, symbol, str(sprResponse)))
+            spr = self._spr.getQuote(symbol=symbol, exchange=exchange)
+            self._log.info("[%s] [%s]%s: %s" % (session, exchange, symbol, str(spr)))
             
-            mxopResponses = { }
+            oprs = { }
             # Options
             for instrument in instruments:
                 mxopResponse = self._mxop.getOption(instrument=instrument)
                 self._log.info("[%s] [%s]: %s" % (session, instrument, str(mxopResponse)))
-                mxopResponses[instrument] = mxopResponse
-            # New session interval dir (does not create it yet)
-            intervalDir = self._configuration.getNewSessionIntervalDir(session=session)
+                oprs[instrument] = mxopResponse
             
-            # Now that we have the data we need, create a new trading session
-            tradingSession = self._tradingsessions[session].newTradingSession()
+            self._deltaHedges[session].doHedge(spr=spr, oprs=oprs)
             
-            tradingSession.applyStockPrice(stockprice=sprResponse)
-            for instrument in mxopResponses:
-                tradingSession.applyOption(option=mxopResponses[instrument])
-                
-            self._tradingsessions[session].commitTradingSession(tradingSession=tradingSession, outputDir=intervalDir)
-           
         except Exception as e:
             raise e
             #self._log.exception("[%s] Failed to execute session interval" % session, exc_info=e)

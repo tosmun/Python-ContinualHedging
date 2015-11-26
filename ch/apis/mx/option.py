@@ -1,4 +1,4 @@
-import re
+import re, time
 from lxml import html
 from ch.apis import Requests, Response
 
@@ -39,6 +39,9 @@ class MXOptionResponse(Response):
         #TODO Retrieve this from the HTML? We can probably stick with hardcoding from the name
         optionType = 'CALL' if 'C' in self._instrument.upper() else 'PUT'
         kwargs['_strikePrice'] = float(re.sub('\w+\s+[0-9]+(?:C|P)([-+]?(?:\d*[.])?\d+)', '\g<1>', self._instrument))
+        #TODO Retrieve this from the HTML?
+        expirationStr = re.sub('\w+\s+(\d+)(?:C|P).*', '\g<1>', self._instrument)
+        kwargs['_expirationSec'] = time.mktime(time.strptime(expirationStr, '%y%m%d'))
         self._option = MXOption(optionType=optionType, **kwargs)
         
     def getInstrument(self):
@@ -63,6 +66,7 @@ class MXOption():
         "_askSize",
         "_impliedVolatility",
         "_strikePrice",
+        "_expirationSec",
     ]
     def __init__(self, optionType=None, **kwargs):
         self._optionType = optionType
@@ -93,7 +97,8 @@ class MXOption():
         return self._askSize
     def getImpliedVolatility(self):
         return self._impliedVolatility
-    
+    def getExpirationTimeSec(self):
+        return self._expirationSec
     def __str__(self):
         mappingStr = ""
         for attrName in self._ATTRIBUTES:

@@ -31,6 +31,8 @@ class Configuration(configparser.RawConfigParser):
         return self.get(session, 'symbol')
     def getSessionExchange(self, session):
         return self.get(session, 'exchange')
+    def getSessionInterestRate(self, session):
+        return float(self.get(session, 'interest_rate'))
     def getSessionInstruments(self, session):
         return self.getSessionDHInstruments(session=session)
     def getSessionDir(self, session):

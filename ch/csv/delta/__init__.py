@@ -1,4 +1,4 @@
-import os, csv, time, shutil
+import os, csv, time, shutil, math
 from distutils.command.config import config
 from collections import deque
 
@@ -6,6 +6,7 @@ class DeltaHedge():
     _config = None
     _session = None
     _instruments = None
+    _interestRate = None
     _fileName = None
     _filePath = None
     _bckFilePath = None
@@ -24,6 +25,7 @@ class DeltaHedge():
         self._config = config
         self._session = session
         self._instruments = self._config.getSessionDHInstruments(session=session)
+        self._interestRate = self._config.getSessionInterestRate(session=session)
         self._fileName = self._config.getSessionDHFileFormat(session=session) % self._instruments
         self._filePath = os.path.join(self._config.getSessionDir(session=session), self._fileName)
         self._bckFilePath = "%s.bck" % self._filePath
@@ -71,7 +73,7 @@ class _DeltaHedgeData():
     _impliedVol = None
     _timeStampSec = None
     _elapsedTimeYears = None
-    _deltaHedge = -1
+    _delta = -1
     _shares = -1
     def __init__(self, parent, spr, oprs):
         self._parent = parent
@@ -90,13 +92,28 @@ class _DeltaHedgeData():
         self._impliedVol = option.getImpliedVolatility()
         #TODO
         self._elapsedTimeYears = (int(self._parent._config.getHardcodedExpTime(session=self._parent._session)) - self._timeStampSec) / (60 * 60 * 24 * 365)
+        
+        #d2
+        #TODO 42.49
+        d2 = (
+              math.log(self._stockPrice / 42.49) + 
+                (((self._parent._interestRate - (self._impliedVol * self._impliedVol)) / 2) * self._elapsedTimeYears)
+            ) / (self._impliedVol * math.sqrt(self._elapsedTimeYears))
+        print(d2)
+        #delta
+        self._delta = -1 * math.exp(-1 * self._parent._interestRate * self._elapsedTimeYears) * (math.exp(-1 * d2*d2 / 2) / math.sqrt(2 * math.pi)) / (self._impliedVol * self._stockPrice * math.sqrt(self._elapsedTimeYears))
+        self._delta *= -232000
+        #TODO -232000
+        self._shares = -1 * round(self._delta)
+        
+        
     def toDict(self):
         ret = { }
         ret[self._parent._timeH] = time.strftime(self._parent._timeFormat, time.localtime(self._timeStampSec))
         ret[self._parent._stockPriceH] = "%.2f" % self._stockPrice
         ret[self._parent._implVolH] = "%.2f" % self._impliedVol
         ret[self._parent._elapsedTimeH] = "%.5f" % self._elapsedTimeYears
-        ret[self._parent._deltaH] = "%.5f" % self._deltaHedge
+        ret[self._parent._deltaH] = "%.5f" % self._delta
         ret[self._parent._sharesH] = "%d" % self._shares
         return ret;
     def __str__(self):

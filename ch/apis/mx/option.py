@@ -96,7 +96,7 @@ class MXOption():
     def getAskSize(self):
         return self._askSize
     def getImpliedVolatility(self):
-        return self._impliedVolatility
+        return self._impliedVolatility / 100
     def getExpirationTimeSec(self):
         return self._expirationSec
     def __str__(self):

@@ -96,11 +96,21 @@ class _DeltaHedgeData():
         #d2
         #TODO 42.49
         d2 = (
-              math.log(self._stockPrice / 42.49) + 
-                (((self._parent._interestRate - (self._impliedVol * self._impliedVol)) / 2) * self._timeRYears)
+             math.log(self._stockPrice / 42.49) + 
+                (
+                    (self._parent._interestRate - 
+                        (self._impliedVol * self._impliedVol / 2)
+                    ) * self._timeRYears
+                )
             ) / (self._impliedVol * math.sqrt(self._timeRYears))
         #delta
-        self._delta = -1 * math.exp(-1 * self._parent._interestRate * self._timeRYears) * (math.exp(-1 * d2*d2 / 2) / math.sqrt(2 * math.pi)) / (self._impliedVol * self._stockPrice * math.sqrt(self._timeRYears))
+        self._delta = (
+                (
+                    -1 * math.exp(-1 * self._parent._interestRate * self._timeRYears) 
+                    * math.exp(-1 * d2*d2 / 2) 
+                    / math.sqrt(2 * math.pi) 
+                ) / (self._impliedVol * self._stockPrice * math.sqrt(self._timeRYears))
+            )
         self._delta *= -232000
         #TODO -232000
         self._shares = -1 * round(self._delta)

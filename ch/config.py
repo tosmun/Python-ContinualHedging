@@ -1,4 +1,4 @@
-import os.path, configparser, re, time
+import os.path, configparser, re
 
 class Configuration(configparser.RawConfigParser):
     _LOGGING = 'Logging'

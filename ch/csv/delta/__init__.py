@@ -61,10 +61,10 @@ class DeltaHedge():
         try:
             if not os.path.isfile(self._filePath):
                 with open(self._filePath, 'w') as fp:
-                    writer = csv.DictWriter(f=fp, delimiter=',', fieldnames=self._headers)
+                    writer = csv.DictWriter(f=fp, delimiter=',', fieldnames=self._headers, lineterminator='\n')
                     writer.writeheader()
             with open(self._filePath, 'a') as fp:
-                writer = csv.DictWriter(f=fp, delimiter=',', fieldnames=self._headers)
+                writer = csv.DictWriter(f=fp, delimiter=',', fieldnames=self._headers, lineterminator='\n')
                 writer.writerow(newData.toDict())
             self._commit()
         except Exception as e:
@@ -76,10 +76,10 @@ class DeltaHedge():
         tmpFilePath = self._begin()
         try:
             with open(tmpFilePath, 'r') as fpr:
-                reader = csv.DictReader(f=fpr, delimiter=",", fieldnames=self._headers)
+                reader = csv.DictReader(f=fpr, delimiter=",", fieldnames=self._headers, lineterminator='\n')
                 next(reader, None)  # skip the headers
                 with open(self._filePath, 'w') as fpw:
-                    writer = csv.DictWriter(f=fpw, delimiter=",", fieldnames=self._headers)
+                    writer = csv.DictWriter(f=fpw, delimiter=",", fieldnames=self._headers,  lineterminator='\n')
                     writer.writeheader()
                     for row in reader:
                         parsedRow = _DeltaHedgeData(parent=self, existingDict=row)

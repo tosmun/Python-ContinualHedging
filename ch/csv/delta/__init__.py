@@ -1,8 +1,10 @@
 import os, csv, time, shutil, math
 from distutils.command.config import config
 from collections import deque
+from ch import logger
 
 class DeltaHedge():
+    _log = None
     _config = None
     _session = None
     _instruments = None
@@ -23,6 +25,7 @@ class DeltaHedge():
     
     def __init__(self, config, session):
         self._config = config
+        self._log = logger.Log(self._config, self.__class__.__name__)
         self._session = session
         self._instruments = self._config.getSessionDHInstruments(session=session)
         self._interestRate = self._config.getSessionInterestRate(session=session)
@@ -37,19 +40,20 @@ class DeltaHedge():
         self._deltaH = self._config.getSessionDHHDelta(session=self._session)
         self._sharesH = self._config.getSessionDHHShares(session=self._session)
         self._timeFormat = self._config.getSessionDHTimeFormat(session=session)
-
+        if self._config.getSessionDHVerifyOnStart(session=session):
+            self._verifyData()
     def _begin(self):
         #If it does not exist, nothing to back up
         if not os.path.isfile(self._filePath):
             return
         shutil.copy(self._filePath, self._bckFilePath)
+        return self._bckFilePath
     def _rollback(self):
         if os.path.isfile(self._bckFilePath):
             shutil.move(self._bckFilePath, self._filePath)
     def _commit(self):
         if os.path.isfile(self._bckFilePath):
-            os.remove(self._bckFilePath)
-            
+            os.remove(self._bckFilePath)      
     def doHedge(self, spr, oprs):
         newData = _DeltaHedgeData(parent=self, spr=spr, oprs=oprs)
         #Begin write process
@@ -66,7 +70,27 @@ class DeltaHedge():
         except Exception as e:
             self._rollback()    
             raise e
-
+    def _verifyData(self):
+        if not os.path.isfile(self._filePath):
+            return
+        tmpFilePath = self._begin()
+        try:
+            with open(tmpFilePath, 'r') as fpr:
+                reader = csv.DictReader(f=fpr, delimiter=",", fieldnames=self._headers)
+                next(reader, None)  # skip the headers
+                with open(self._filePath, 'w') as fpw:
+                    writer = csv.DictWriter(f=fpw, delimiter=",", fieldnames=self._headers)
+                    writer.writeheader()
+                    for row in reader:
+                        parsedRow = _DeltaHedgeData(parent=self, existingDict=row)
+                        if self._log.isDebugEnabled():
+                            self._log.debug("Verified: %s" % parsedRow)
+                        writer.writerow(parsedRow.toDict())
+            self._commit()
+        except Exception as e:
+            self._rollback()
+            raise e
+                    
 class _DeltaHedgeData():
     _parent = None
     _stockPrice = None
@@ -75,24 +99,30 @@ class _DeltaHedgeData():
     _timeRYears = None
     _delta = -1
     _shares = -1
-    def __init__(self, parent, spr, oprs):
+    def __init__(self, parent, existingDict=None, spr=None, oprs=None):
         self._parent = parent
-        self._timeStampSec = int(time.time())
-        self._stockPrice = spr.getLastTradePrice()
-        ourOprs = { }
-        for instrument in oprs:
-            #Only instruments that do not belong to us
-            if instrument in parent._instruments:
-                ourOprs[instrument] = oprs[instrument]
-        #TODO support more some day
-        if len(ourOprs) != 1:
-            raise Exception("Supporting one and only one instrument for now")
-        opr = next(iter(oprs.values()))
-        option = opr.getOption()
-        self._impliedVol = option.getImpliedVolatility()
+        if existingDict is None:
+            self._timeStampSec = int(time.time())
+            self._stockPrice = spr.getLastTradePrice()
+            ourOprs = { }
+            for instrument in oprs:
+                #Only instruments that do not belong to us
+                if instrument in parent._instruments:
+                    ourOprs[instrument] = oprs[instrument]
+            #TODO support more some day
+            if len(ourOprs) != 1:
+                raise Exception("Supporting one and only one instrument for now")
+            opr = next(iter(oprs.values()))
+            option = opr.getOption()
+            self._impliedVol = option.getImpliedVolatility()
+            
+        else:
+            self._stockPrice = float(existingDict['Stock Price'])
+            self._impliedVol = float(existingDict['Implied Vol.'])
+            self._timeStampSec = time.mktime(time.strptime(existingDict['Time'], self._parent._timeFormat))
+        
         #TODO
         self._timeRYears = (int(self._parent._config.getHardcodedExpTime(session=self._parent._session)) - self._timeStampSec) / (60 * 60 * 24 * 365)
-        
         #d2
         #TODO 42.49
         d2 = (
@@ -114,8 +144,7 @@ class _DeltaHedgeData():
         self._delta *= -232000
         #TODO -232000
         self._shares = -1 * round(self._delta)
-        
-        
+    
     def toDict(self):
         ret = { }
         ret[self._parent._timeH] = time.strftime(self._parent._timeFormat, time.localtime(self._timeStampSec))
@@ -124,7 +153,7 @@ class _DeltaHedgeData():
         ret[self._parent._timeR] = "%.5f" % self._timeRYears
         ret[self._parent._deltaH] = "%.5f" % self._delta
         ret[self._parent._sharesH] = "%d" % self._shares
-        return ret;
+        return ret
     def __str__(self):
         return "_DeltaHedgeData: timeStampSec->%s, stockPrice->%s, impliedVol->%s, deltaHedge->%s, shares->%s" % (
-            self._timeStampSec, self._stockPrice, self._impliedVol, self._deltaHedge, self._shares)
+            self._timeStampSec, self._stockPrice, self._impliedVol, self._delta, self._shares)

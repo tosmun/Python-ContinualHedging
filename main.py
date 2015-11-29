@@ -8,7 +8,6 @@ arg_parser.add_argument('--config', action='store',
                         default='./ContinualHedging.properties',
                         required=False, help='Path to py properties file.'+
                         'File encoding is assumed to be UTF-8')
-
 def main():
     args = arg_parser.parse_known_args(sys.argv[1:])[0]
     d = Daemon(configFilePath=args.configFile)

@@ -42,6 +42,8 @@ class Configuration(configparser.RawConfigParser):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'dh_instruments')) if x.strip() != ""]
     def getSessionDHFileFormat(self, session):
         return self.get(session, 'dh_file_format')
+    def getSessionDHVerifyOnStart(self, session):
+        return self.get(session, 'dh_verify_on_start') == 'true'
     def getSessionDHFileHeaders(self, session):
         return [x for x in re.split(pattern='\s*,\s*', string=self.get(session, 'df_file_headers')) if x.strip() != ""]
     def getSessionDHHTime(self, session):

@@ -149,9 +149,9 @@ class _DeltaHedgeData():
         ret = { }
         ret[self._parent._timeH] = time.strftime(self._parent._timeFormat, time.localtime(self._timeStampSec))
         ret[self._parent._stockPriceH] = "%.2f" % self._stockPrice
-        ret[self._parent._implVolH] = "%.2f" % self._impliedVol
-        ret[self._parent._timeR] = "%.5f" % self._timeRYears
-        ret[self._parent._deltaH] = "%.5f" % self._delta
+        ret[self._parent._implVolH] = "%.6f" % self._impliedVol
+        ret[self._parent._timeR] = "%f" % self._timeRYears
+        ret[self._parent._deltaH] = "%f" % self._delta
         ret[self._parent._sharesH] = "%d" % self._shares
         return ret
     def __str__(self):

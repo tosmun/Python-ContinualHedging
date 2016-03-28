@@ -1,6 +1,6 @@
 import re, time
 from lxml import html
-from ch.apis import Requests, Response
+from ch.apis.base import Requests, Response
 
 class MXOptionResponse(Response):
     _MAPPING = {

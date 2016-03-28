@@ -1,6 +1,4 @@
 import os, csv, time, shutil, math
-from distutils.command.config import config
-from collections import deque
 from ch import logger
 
 class DeltaHedge():

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys, argparse
-from ch import Daemon
+from ch.daemon import Daemon
 
 arg_parser = argparse.ArgumentParser(description='ContinualHedging')
 arg_parser.add_argument('--config', action='store',

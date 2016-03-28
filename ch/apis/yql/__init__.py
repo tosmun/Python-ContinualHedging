@@ -1,4 +1,4 @@
-from ch.apis import Requests, Response
+from ch.apis.base import Requests, Response
 
 class YQLResponse(Response):
     _json = None

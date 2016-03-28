@@ -28,7 +28,10 @@ class DeltaHedge():
         self._instruments = self._config.getSessionDHInstruments(session=session)
         self._interestRate = self._config.getSessionInterestRate(session=session)
         self._fileName = self._config.getSessionDHFileFormat(session=session) % self._instruments
-        self._filePath = os.path.join(self._config.getSessionDir(session=session), self._fileName)
+        sessionDir = self._config.getSessionDir(session=session)
+        if not os.path.isdir(sessionDir):
+            os.makedirs(sessionDir)
+        self._filePath = os.path.join(sessionDir, self._fileName)
         self._bckFilePath = "%s.bck" % self._filePath
         self._headers = self._config.getSessionDHFileHeaders(session=session)
         self._timeH = self._config.getSessionDHHTime(session=session)
@@ -124,7 +127,7 @@ class _DeltaHedgeData():
         #d2
         #TODO 42.49
         d2 = (
-             math.log(self._stockPrice / 42.49) + 
+             math.log(self._stockPrice / 41.00) + 
                 (
                     (self._parent._interestRate - 
                         (self._impliedVol * self._impliedVol / 2)
